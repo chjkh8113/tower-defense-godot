@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://tower001"]
+
+[ext_resource type="Script" path="res://scripts/tower.gd" id="1_tower"]
+
+[node name="Tower" type="Node2D"]
+script = ExtResource("1_tower")
+
+[node name="Sprite2D" type="Node2D" parent="."]
+
+[node name="Base" type="ColorRect" parent="Sprite2D"]
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+color = Color(0.3, 0.3, 0.4, 1)
+
+[node name="RangeIndicator" type="Node2D" parent="."]
+visible = false
+
+[node name="Circle" type="ColorRect" parent="RangeIndicator"]
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+color = Color(0.5, 0.7, 1, 0.15)
+
+[node name="Turret" type="Node2D" parent="."]
+
+[node name="Barrel" type="ColorRect" parent="Turret"]
+offset_left = -6.0
+offset_top = -4.0
+offset_right = 24.0
+offset_bottom = 4.0
+color = Color(0.2, 0.2, 0.25, 1)
+
+[node name="TurretBase" type="ColorRect" parent="Turret"]
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+color = Color(0.4, 0.4, 0.5, 1)

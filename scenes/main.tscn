@@ -1,0 +1,49 @@
+[gd_scene load_steps=7 format=3 uid="uid://main001"]
+
+[ext_resource type="Script" path="res://scripts/game_manager.gd" id="1_gm"]
+[ext_resource type="Script" path="res://scripts/wave_spawner.gd" id="2_ws"]
+[ext_resource type="Script" path="res://scripts/build_grid.gd" id="3_bg"]
+[ext_resource type="Script" path="res://scripts/game_ui.gd" id="4_ui"]
+[ext_resource type="Script" path="res://scripts/map_generator.gd" id="5_mg"]
+[ext_resource type="Script" path="res://scripts/audio_manager.gd" id="6_am"]
+
+[sub_resource type="Curve2D" id="Curve2D_1"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, -32, 350, 0, 0, 0, 0, 200, 350, 0, 0, 0, 0, 200, 150, 0, 0, 0, 0, 500, 150, 0, 0, 0, 0, 500, 450, 0, 0, 0, 0, 800, 450, 0, 0, 0, 0, 800, 250, 0, 0, 0, 0, 1100, 250, 0, 0, 0, 0, 1100, 500, 0, 0, 0, 0, 1350, 500)
+}
+point_count = 11
+
+[node name="Main" type="Node2D"]
+
+[node name="Background" type="ColorRect" parent="."]
+z_index = -10
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.12, 0.14, 0.18, 1)
+
+[node name="EnemyPath" type="Path2D" parent="."]
+curve = SubResource("Curve2D_1")
+
+[node name="MapGenerator" type="Node2D" parent="."]
+script = ExtResource("5_mg")
+
+[node name="GameManager" type="Node2D" parent="."]
+script = ExtResource("1_gm")
+
+[node name="EnemyContainer" type="Node2D" parent="GameManager"]
+
+[node name="TowerContainer" type="Node2D" parent="GameManager"]
+
+[node name="ProjectileContainer" type="Node2D" parent="GameManager"]
+
+[node name="BuildGrid" type="Node2D" parent="."]
+script = ExtResource("3_bg")
+
+[node name="WaveSpawner" type="Node" parent="."]
+script = ExtResource("2_ws")
+
+[node name="AudioManager" type="Node" parent="."]
+script = ExtResource("6_am")
+
+[node name="GameUI" type="CanvasLayer" parent="."]
+script = ExtResource("4_ui")
