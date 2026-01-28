@@ -13,6 +13,7 @@ var wave_timer_label: Label
 var next_wave_button: Button
 
 func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	create_footer()
 
 func create_footer() -> void:

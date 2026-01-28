@@ -20,6 +20,7 @@ var boss_label: Label
 var boss_health_bar: ProgressBar
 
 func _ready() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
 	create_header()
 
 func create_header() -> void:
