@@ -1,4 +1,4 @@
-extends Control
+extends RefCounted
 class_name HeaderUI
 ## Header panel with stats, difficulty selector, boss health bar, and audio controls
 
@@ -8,6 +8,7 @@ signal music_toggled()
 
 var config = preload("res://scripts/game_config.gd")
 
+var parent_node: Node
 var header_panel: Panel
 var gold_label: Label
 var lives_label: Label
@@ -19,11 +20,9 @@ var boss_container: Control
 var boss_label: Label
 var boss_health_bar: ProgressBar
 
-func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	anchor_right = 1.0
-	anchor_bottom = 1.0
-	call_deferred("create_header")
+func setup(parent: Node) -> void:
+	parent_node = parent
+	create_header()
 
 func create_header() -> void:
 	header_panel = Panel.new()
@@ -34,7 +33,7 @@ func create_header() -> void:
 	header_style.border_width_bottom = 2
 	header_style.border_color = Color(0.3, 0.3, 0.4)
 	header_panel.add_theme_stylebox_override("panel", header_style)
-	add_child(header_panel)
+	parent_node.add_child(header_panel)
 
 	create_stats()
 	create_difficulty_selector()

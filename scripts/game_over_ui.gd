@@ -1,20 +1,19 @@
-extends Control
+extends RefCounted
 class_name GameOverUI
 ## Game over panel with victory/defeat messages and buttons
 
 signal continue_pressed()
 signal restart_pressed()
 
+var parent_node: Node
 var game_over_panel: Panel
 var game_over_label: Label
 var continue_button: Button
 var restart_button: Button
 
-func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	anchor_right = 1.0
-	anchor_bottom = 1.0
-	call_deferred("create_panel")
+func setup(parent: Node) -> void:
+	parent_node = parent
+	create_panel()
 
 func create_panel() -> void:
 	game_over_panel = Panel.new()
@@ -37,7 +36,7 @@ func create_panel() -> void:
 	panel_style.corner_radius_bottom_left = 10
 	panel_style.corner_radius_bottom_right = 10
 	game_over_panel.add_theme_stylebox_override("panel", panel_style)
-	add_child(game_over_panel)
+	parent_node.add_child(game_over_panel)
 
 	var vbox = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -68,16 +67,21 @@ func create_panel() -> void:
 	vbox.add_child(restart_button)
 
 func show_game_over() -> void:
+	if not game_over_panel:
+		return
 	game_over_panel.visible = true
 	game_over_label.text = "GAME OVER\nThe enemies broke through!"
 	continue_button.visible = false
 	restart_button.visible = true
 
 func show_victory() -> void:
+	if not game_over_panel:
+		return
 	game_over_panel.visible = true
 	game_over_label.text = "VICTORY!\nAll 10 waves cleared!\n\nReady for Endless Mode?"
 	continue_button.visible = true
 	restart_button.visible = true
 
 func hide_panel() -> void:
-	game_over_panel.visible = false
+	if game_over_panel:
+		game_over_panel.visible = false

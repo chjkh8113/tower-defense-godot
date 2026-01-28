@@ -1,4 +1,4 @@
-extends Control
+extends RefCounted
 class_name FooterUI
 ## Footer panel with tower buttons and wave controls
 
@@ -7,16 +7,15 @@ signal start_wave_pressed()
 
 var config = preload("res://scripts/game_config.gd")
 
+var parent_node: Node
 var footer_panel: Panel
 var tower_buttons: HBoxContainer
 var wave_timer_label: Label
 var next_wave_button: Button
 
-func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	anchor_right = 1.0
-	anchor_bottom = 1.0
-	call_deferred("create_footer")
+func setup(parent: Node) -> void:
+	parent_node = parent
+	create_footer()
 
 func create_footer() -> void:
 	footer_panel = Panel.new()
@@ -27,7 +26,7 @@ func create_footer() -> void:
 	footer_style.border_width_top = 2
 	footer_style.border_color = Color(0.3, 0.3, 0.4)
 	footer_panel.add_theme_stylebox_override("panel", footer_style)
-	add_child(footer_panel)
+	parent_node.add_child(footer_panel)
 
 	var footer_content = HBoxContainer.new()
 	footer_content.set_anchors_preset(Control.PRESET_FULL_RECT)

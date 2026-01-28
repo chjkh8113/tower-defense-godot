@@ -22,13 +22,13 @@ func _ready() -> void:
 
 func create_ui_modules() -> void:
 	header_ui = HeaderUI.new()
-	add_child(header_ui)
+	header_ui.setup(self)
 
 	footer_ui = FooterUI.new()
-	add_child(footer_ui)
+	footer_ui.setup(self)
 
 	game_over_ui = GameOverUI.new()
-	add_child(game_over_ui)
+	game_over_ui.setup(self)
 
 func connect_signals() -> void:
 	# Header UI signals
