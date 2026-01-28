@@ -51,21 +51,37 @@ const ENEMY_CONFIGS := {
 		"health": 50,
 		"speed": 80.0,
 		"gold_reward": 10,
-		"color": Color(1.0, 0.4, 0.4)
+		"color": Color(1.0, 0.4, 0.4),
+		"is_boss": false,
+		"damage_reduction": 0.0
 	},
 	"fast": {
 		"name": "Fast Enemy",
 		"health": 30,
 		"speed": 150.0,
 		"gold_reward": 15,
-		"color": Color(1.0, 1.0, 0.4)
+		"color": Color(1.0, 1.0, 0.4),
+		"is_boss": false,
+		"damage_reduction": 0.0
 	},
 	"tank": {
 		"name": "Tank Enemy",
 		"health": 200,
 		"speed": 40.0,
 		"gold_reward": 30,
-		"color": Color(0.6, 0.4, 0.8)
+		"color": Color(0.6, 0.4, 0.8),
+		"is_boss": false,
+		"damage_reduction": 0.0
+	},
+	"boss": {
+		"name": "BOSS",
+		"health": 1000,
+		"speed": 25.0,
+		"gold_reward": 100,
+		"color": Color(0.9, 0.1, 0.9),
+		"is_boss": true,
+		"damage_reduction": 0.5,
+		"size_scale": 2.0
 	}
 }
 

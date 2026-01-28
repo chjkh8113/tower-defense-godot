@@ -24,6 +24,12 @@ var restart_button: Button
 var sfx_button: Button
 var music_button: Button
 
+# Boss health bar
+var boss_container: Control
+var boss_label: Label
+var boss_health_bar: ProgressBar
+var current_boss: Node = null
+
 func _ready() -> void:
 	game_manager = get_node("../GameManager")
 	wave_spawner = get_node("../WaveSpawner")
@@ -42,9 +48,9 @@ func _ready() -> void:
 	if wave_spawner:
 		wave_spawner.wave_started.connect(_on_wave_started)
 		wave_spawner.all_waves_completed.connect(_on_all_waves_completed)
+		wave_spawner.boss_spawned.connect(_on_boss_spawned)
 
 func create_header() -> void:
-	# Header background panel
 	header_panel = Panel.new()
 	header_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	header_panel.offset_bottom = config.HEADER_HEIGHT
@@ -79,6 +85,38 @@ func create_header() -> void:
 	wave_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
 	stats_container.add_child(wave_label)
 
+	# Center: Boss health bar
+	boss_container = Control.new()
+	boss_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	boss_container.offset_left = -200
+	boss_container.offset_right = 200
+	boss_container.offset_top = 8
+	boss_container.offset_bottom = 52
+	boss_container.visible = false
+	header_panel.add_child(boss_container)
+
+	boss_label = Label.new()
+	boss_label.text = "BOSS"
+	boss_label.add_theme_font_size_override("font_size", 14)
+	boss_label.add_theme_color_override("font_color", Color(1.0, 0.2, 1.0))
+	boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_label.position = Vector2(0, 0)
+	boss_label.size = Vector2(400, 20)
+	boss_container.add_child(boss_label)
+
+	boss_health_bar = ProgressBar.new()
+	boss_health_bar.position = Vector2(0, 20)
+	boss_health_bar.size = Vector2(400, 24)
+	boss_health_bar.value = 100
+	boss_health_bar.show_percentage = false
+	var bar_style = StyleBoxFlat.new()
+	bar_style.bg_color = Color(0.9, 0.1, 0.9)
+	boss_health_bar.add_theme_stylebox_override("fill", bar_style)
+	var bg_style = StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.2, 0.1, 0.2)
+	boss_health_bar.add_theme_stylebox_override("background", bg_style)
+	boss_container.add_child(boss_health_bar)
+
 	# Right side: Audio controls
 	var audio_container = HBoxContainer.new()
 	audio_container.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -87,19 +125,18 @@ func create_header() -> void:
 	header_panel.add_child(audio_container)
 
 	sfx_button = Button.new()
-	sfx_button.text = "SFX: OFF"  # Default OFF
+	sfx_button.text = "SFX: OFF"
 	sfx_button.custom_minimum_size = Vector2(90, 35)
 	sfx_button.pressed.connect(_on_sfx_button_pressed)
 	audio_container.add_child(sfx_button)
 
 	music_button = Button.new()
-	music_button.text = "Music: OFF"  # Default OFF
+	music_button.text = "Music: OFF"
 	music_button.custom_minimum_size = Vector2(100, 35)
 	music_button.pressed.connect(_on_music_button_pressed)
 	audio_container.add_child(music_button)
 
 func create_footer() -> void:
-	# Footer background panel
 	footer_panel = Panel.new()
 	footer_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	footer_panel.offset_top = -config.FOOTER_HEIGHT
@@ -110,7 +147,6 @@ func create_footer() -> void:
 	footer_panel.add_theme_stylebox_override("panel", footer_style)
 	add_child(footer_panel)
 
-	# Main footer content container
 	var footer_content = HBoxContainer.new()
 	footer_content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	footer_content.offset_left = 20
@@ -121,7 +157,6 @@ func create_footer() -> void:
 	footer_content.add_theme_constant_override("separation", 30)
 	footer_panel.add_child(footer_content)
 
-	# Tower buttons section
 	var tower_section = VBoxContainer.new()
 	tower_section.add_theme_constant_override("separation", 2)
 	footer_content.add_child(tower_section)
@@ -150,7 +185,6 @@ func create_footer() -> void:
 		button.add_theme_stylebox_override("normal", btn_style)
 		tower_buttons.add_child(button)
 
-	# Wave controls section
 	var wave_section = VBoxContainer.new()
 	wave_section.add_theme_constant_override("separation", 2)
 	footer_content.add_child(wave_section)
@@ -227,6 +261,30 @@ func create_game_over_panel() -> void:
 	restart_button.custom_minimum_size = Vector2(180, 45)
 	restart_button.pressed.connect(_on_restart_pressed)
 	vbox.add_child(restart_button)
+
+func _on_boss_spawned(boss: Node) -> void:
+	current_boss = boss
+	boss_container.visible = true
+	boss_health_bar.value = 100
+
+	if boss.has_signal("boss_health_changed"):
+		boss.boss_health_changed.connect(_on_boss_health_changed)
+	if boss.has_signal("died"):
+		boss.died.connect(_on_boss_died)
+	if boss.has_signal("reached_end"):
+		boss.reached_end.connect(_on_boss_escaped)
+
+func _on_boss_health_changed(current: int, maximum: int) -> void:
+	boss_health_bar.value = float(current) / float(maximum) * 100
+	boss_label.text = "BOSS - %d / %d" % [current, maximum]
+
+func _on_boss_died(_gold: int) -> void:
+	boss_container.visible = false
+	current_boss = null
+
+func _on_boss_escaped() -> void:
+	boss_container.visible = false
+	current_boss = null
 
 func _on_sfx_button_pressed() -> void:
 	if audio_manager:

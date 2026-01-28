@@ -5,6 +5,7 @@ class_name WaveSpawner
 signal wave_started(wave_number: int)
 signal wave_completed(wave_number: int)
 signal all_waves_completed()
+signal boss_spawned(boss: Node)
 
 var enemy_path: Path2D
 var game_manager: Node2D
@@ -43,7 +44,6 @@ func _process(delta: float) -> void:
 	if not game_manager or game_manager.is_game_over:
 		return
 
-	# Pause spawning when victory screen is shown (waiting for player to continue)
 	if victory_shown and not endless_mode:
 		return
 
@@ -65,19 +65,22 @@ func _process(delta: float) -> void:
 			var config = preload("res://scripts/game_config.gd")
 			between_wave_timer = config.WAVE_DELAY
 
-			# Show victory after wave 10 (only once)
 			if current_wave >= waves.size() and not victory_shown:
 				victory_shown = true
 				all_waves_completed.emit()
 
 func start_next_wave() -> void:
 	if current_wave >= waves.size():
-		# Endless mode waves
 		enemies_to_spawn = generate_endless_wave(current_wave)
 	else:
 		enemies_to_spawn = waves[current_wave].duplicate()
 
 	current_wave += 1
+
+	# Add boss every 2 waves (wave 2, 4, 6, 8, 10, ...)
+	if current_wave % 2 == 0:
+		enemies_to_spawn.append("boss")
+
 	wave_in_progress = true
 	between_waves = false
 	wave_started.emit(current_wave)
@@ -92,10 +95,17 @@ func spawn_next_enemy() -> void:
 		return
 
 	var enemy_type = enemies_to_spawn.pop_front()
-	game_manager.spawn_enemy(enemy_type, enemy_path, current_wave)
+	var enemy = game_manager.spawn_enemy(enemy_type, enemy_path, current_wave)
+
+	if enemy and enemy_type == "boss":
+		boss_spawned.emit(enemy)
 
 	var config = preload("res://scripts/game_config.gd")
-	var spawn_speed = config.SPAWN_INTERVAL * max(0.5, 1.0 - current_wave * 0.05)
+	var spawn_speed = config.SPAWN_INTERVAL
+	if enemy_type == "boss":
+		spawn_speed = 2.0
+	else:
+		spawn_speed = config.SPAWN_INTERVAL * max(0.5, 1.0 - current_wave * 0.05)
 	spawn_timer = spawn_speed
 
 func generate_endless_wave(wave_num: int) -> Array:
@@ -109,6 +119,9 @@ func generate_endless_wave(wave_num: int) -> Array:
 			type_index = 2
 		wave.append(types[type_index])
 
+	# Endless mode also gets boss every 2 waves
+	# Boss is added in start_next_wave()
+
 	return wave
 
 func get_wave_countdown() -> float:
@@ -119,7 +132,6 @@ func get_wave_countdown() -> float:
 func skip_wave_countdown() -> void:
 	if between_waves:
 		between_wave_timer = 0.0
-	# Enable endless mode when continuing after victory
 	if victory_shown:
 		endless_mode = true
 		print("Endless mode activated!")

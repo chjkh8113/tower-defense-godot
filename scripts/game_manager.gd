@@ -56,12 +56,13 @@ func lose_life(amount: int = 1) -> void:
 		is_game_over = true
 		game_over.emit(false)
 
-func spawn_enemy(enemy_type: String, path: Path2D, wave: int) -> void:
+func spawn_enemy(enemy_type: String, path: Path2D, wave: int) -> Node:
 	var enemy = enemy_scene.instantiate()
 	enemy.setup(enemy_type, wave)
 	enemy.died.connect(_on_enemy_died)
 	enemy.reached_end.connect(_on_enemy_reached_end)
 	path.add_child(enemy)
+	return enemy
 
 func spawn_tower(tower_type: String, pos: Vector2) -> bool:
 	var config = preload("res://scripts/game_config.gd")
