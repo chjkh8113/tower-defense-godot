@@ -55,7 +55,6 @@ func connect_signals() -> void:
 	if wave_spawner:
 		wave_spawner.wave_started.connect(_on_wave_started)
 		wave_spawner.all_waves_completed.connect(_on_all_waves_completed)
-		wave_spawner.boss_spawned.connect(_on_boss_spawned)
 
 func _process(_delta: float) -> void:
 	if wave_spawner:
@@ -112,6 +111,3 @@ func _on_wave_started(wave_number: int) -> void:
 
 func _on_all_waves_completed() -> void:
 	game_over_ui.show_victory()
-
-func _on_boss_spawned(boss: Node) -> void:
-	header_ui.show_boss(boss)

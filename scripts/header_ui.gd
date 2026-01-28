@@ -1,6 +1,6 @@
 extends RefCounted
 class_name HeaderUI
-## Header panel with stats, difficulty selector, boss health bar, and audio controls
+## Header panel with stats, difficulty selector, and audio controls
 
 signal difficulty_selected(difficulty: String)
 signal sfx_toggled()
@@ -16,9 +16,6 @@ var wave_label: Label
 var sfx_button: Button
 var music_button: Button
 var difficulty_buttons: Dictionary = {}
-var boss_container: Control
-var boss_label: Label
-var boss_health_bar: ProgressBar
 
 func setup(parent: Node) -> void:
 	parent_node = parent
@@ -37,7 +34,6 @@ func create_header() -> void:
 
 	create_stats()
 	create_difficulty_selector()
-	create_boss_health_bar()
 	create_audio_controls()
 
 func create_stats() -> void:
@@ -91,38 +87,6 @@ func create_difficulty_selector() -> void:
 		difficulty_buttons[diff_key] = btn
 
 	update_difficulty_buttons(config.DEFAULT_DIFFICULTY)
-
-func create_boss_health_bar() -> void:
-	boss_container = Control.new()
-	boss_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	boss_container.offset_left = -150
-	boss_container.offset_right = 150
-	boss_container.offset_top = 8
-	boss_container.offset_bottom = 52
-	boss_container.visible = false
-	header_panel.add_child(boss_container)
-
-	boss_label = Label.new()
-	boss_label.text = "BOSS"
-	boss_label.add_theme_font_size_override("font_size", 12)
-	boss_label.add_theme_color_override("font_color", Color(1.0, 0.2, 1.0))
-	boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	boss_label.position = Vector2(0, 0)
-	boss_label.size = Vector2(300, 18)
-	boss_container.add_child(boss_label)
-
-	boss_health_bar = ProgressBar.new()
-	boss_health_bar.position = Vector2(0, 18)
-	boss_health_bar.size = Vector2(300, 20)
-	boss_health_bar.value = 100
-	boss_health_bar.show_percentage = false
-	var bar_style = StyleBoxFlat.new()
-	bar_style.bg_color = Color(0.9, 0.1, 0.9)
-	boss_health_bar.add_theme_stylebox_override("fill", bar_style)
-	var bg_style = StyleBoxFlat.new()
-	bg_style.bg_color = Color(0.2, 0.1, 0.2)
-	boss_health_bar.add_theme_stylebox_override("background", bg_style)
-	boss_container.add_child(boss_health_bar)
 
 func create_audio_controls() -> void:
 	var audio_container = HBoxContainer.new()
@@ -181,25 +145,3 @@ func update_sfx_button(muted: bool) -> void:
 func update_music_button(muted: bool) -> void:
 	if music_button:
 		music_button.text = "Music: OFF" if muted else "Music: ON"
-
-func show_boss(boss: Node) -> void:
-	if not boss_container:
-		return
-	boss_container.visible = true
-	boss_health_bar.value = 100
-	if boss.has_signal("boss_health_changed"):
-		boss.boss_health_changed.connect(_on_boss_health_changed)
-	if boss.has_signal("died"):
-		boss.died.connect(_on_boss_died)
-	if boss.has_signal("reached_end"):
-		boss.reached_end.connect(_on_boss_escaped)
-
-func _on_boss_health_changed(current: int, maximum: int) -> void:
-	boss_health_bar.value = float(current) / float(maximum) * 100
-	boss_label.text = "BOSS - %d / %d" % [current, maximum]
-
-func _on_boss_died(_gold: int) -> void:
-	boss_container.visible = false
-
-func _on_boss_escaped() -> void:
-	boss_container.visible = false

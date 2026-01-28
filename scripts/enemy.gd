@@ -4,7 +4,6 @@ class_name Enemy
 
 signal died(gold_reward: int)
 signal reached_end()
-signal boss_health_changed(current: int, maximum: int)
 
 var enemy_type: String
 var max_health: int
@@ -62,10 +61,7 @@ func _ready() -> void:
 	if body:
 		body.color = enemy_color
 
-	if is_boss and health_bar:
-		health_bar.visible = false
-	else:
-		update_health_bar()
+	update_health_bar()
 
 func _process(delta: float) -> void:
 	progress += speed * delta
@@ -75,7 +71,6 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func take_damage(amount: int) -> void:
-	# Apply difficulty damage multiplier (higher = more damage to enemies)
 	var difficulty_multiplier = 1.0
 	if game_manager and game_manager.has_method("get_damage_multiplier"):
 		difficulty_multiplier = game_manager.get_damage_multiplier()
@@ -85,11 +80,7 @@ func take_damage(amount: int) -> void:
 		actual_damage = 1
 
 	health -= actual_damage
-
-	if is_boss:
-		boss_health_changed.emit(health, max_health)
-	else:
-		update_health_bar()
+	update_health_bar()
 
 	if audio_manager:
 		audio_manager.play_hit()

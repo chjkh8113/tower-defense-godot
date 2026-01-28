@@ -5,7 +5,6 @@ class_name WaveSpawner
 signal wave_started(wave_number: int)
 signal wave_completed(wave_number: int)
 signal all_waves_completed()
-signal boss_spawned(boss: Node)
 
 var enemy_path: Path2D
 var game_manager: Node2D
@@ -98,7 +97,6 @@ func spawn_next_enemy() -> void:
 	var enemy = game_manager.spawn_enemy(enemy_type, enemy_path, current_wave)
 
 	if enemy and enemy_type == "boss":
-		boss_spawned.emit(enemy)
 
 	var config = preload("res://scripts/game_config.gd")
 	var spawn_speed = config.SPAWN_INTERVAL
