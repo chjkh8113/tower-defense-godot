@@ -88,3 +88,26 @@ const ENEMY_CONFIGS := {
 # Wave settings
 const WAVE_DELAY := 5.0
 const SPAWN_INTERVAL := 0.8
+
+# Difficulty settings
+const DIFFICULTY_CONFIGS := {
+	"easy": {
+		"name": "Easy",
+		"gold_multiplier": 1.5,
+		"damage_multiplier": 1.5,
+		"color": Color(0.3, 0.8, 0.3)
+	},
+	"normal": {
+		"name": "Normal",
+		"gold_multiplier": 1.0,
+		"damage_multiplier": 1.0,
+		"color": Color(0.8, 0.8, 0.3)
+	},
+	"hard": {
+		"name": "Hard",
+		"gold_multiplier": 0.6,
+		"damage_multiplier": 0.6,
+		"color": Color(0.8, 0.3, 0.3)
+	}
+}
+const DEFAULT_DIFFICULTY := "normal"

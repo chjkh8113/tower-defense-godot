@@ -30,6 +30,10 @@ var boss_label: Label
 var boss_health_bar: ProgressBar
 var current_boss: Node = null
 
+# Difficulty buttons
+var difficulty_buttons: Dictionary = {}
+var difficulty_container: HBoxContainer
+
 func _ready() -> void:
 	game_manager = get_node("../GameManager")
 	wave_spawner = get_node("../WaveSpawner")
@@ -44,11 +48,14 @@ func _ready() -> void:
 		game_manager.gold_changed.connect(_on_gold_changed)
 		game_manager.lives_changed.connect(_on_lives_changed)
 		game_manager.game_over.connect(_on_game_over)
+		game_manager.difficulty_changed.connect(_on_difficulty_changed)
 
 	if wave_spawner:
 		wave_spawner.wave_started.connect(_on_wave_started)
 		wave_spawner.all_waves_completed.connect(_on_all_waves_completed)
 		wave_spawner.boss_spawned.connect(_on_boss_spawned)
+
+	update_difficulty_buttons(config.DEFAULT_DIFFICULTY)
 
 func create_header() -> void:
 	header_panel = Panel.new()
@@ -64,32 +71,58 @@ func create_header() -> void:
 	# Left side: Game stats
 	var stats_container = HBoxContainer.new()
 	stats_container.position = Vector2(20, 15)
-	stats_container.add_theme_constant_override("separation", 40)
+	stats_container.add_theme_constant_override("separation", 30)
 	header_panel.add_child(stats_container)
 
 	gold_label = Label.new()
 	gold_label.text = "Gold: %d" % config.STARTING_GOLD
-	gold_label.add_theme_font_size_override("font_size", 22)
+	gold_label.add_theme_font_size_override("font_size", 20)
 	gold_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
 	stats_container.add_child(gold_label)
 
 	lives_label = Label.new()
 	lives_label.text = "Lives: %d" % config.STARTING_LIVES
-	lives_label.add_theme_font_size_override("font_size", 22)
+	lives_label.add_theme_font_size_override("font_size", 20)
 	lives_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 	stats_container.add_child(lives_label)
 
 	wave_label = Label.new()
 	wave_label.text = "Wave: 0"
-	wave_label.add_theme_font_size_override("font_size", 22)
+	wave_label.add_theme_font_size_override("font_size", 20)
 	wave_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
 	stats_container.add_child(wave_label)
+
+	# Center-left: Difficulty selector
+	var diff_section = VBoxContainer.new()
+	diff_section.position = Vector2(420, 5)
+	diff_section.add_theme_constant_override("separation", 2)
+	header_panel.add_child(diff_section)
+
+	var diff_label = Label.new()
+	diff_label.text = "DIFFICULTY"
+	diff_label.add_theme_font_size_override("font_size", 10)
+	diff_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	diff_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	diff_section.add_child(diff_label)
+
+	difficulty_container = HBoxContainer.new()
+	difficulty_container.add_theme_constant_override("separation", 5)
+	diff_section.add_child(difficulty_container)
+
+	for diff_key in config.DIFFICULTY_CONFIGS:
+		var diff_config = config.DIFFICULTY_CONFIGS[diff_key]
+		var btn = Button.new()
+		btn.text = diff_config.name
+		btn.custom_minimum_size = Vector2(60, 28)
+		btn.pressed.connect(_on_difficulty_button_pressed.bind(diff_key))
+		difficulty_container.add_child(btn)
+		difficulty_buttons[diff_key] = btn
 
 	# Center: Boss health bar
 	boss_container = Control.new()
 	boss_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	boss_container.offset_left = -200
-	boss_container.offset_right = 200
+	boss_container.offset_left = -150
+	boss_container.offset_right = 150
 	boss_container.offset_top = 8
 	boss_container.offset_bottom = 52
 	boss_container.visible = false
@@ -97,16 +130,16 @@ func create_header() -> void:
 
 	boss_label = Label.new()
 	boss_label.text = "BOSS"
-	boss_label.add_theme_font_size_override("font_size", 14)
+	boss_label.add_theme_font_size_override("font_size", 12)
 	boss_label.add_theme_color_override("font_color", Color(1.0, 0.2, 1.0))
 	boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	boss_label.position = Vector2(0, 0)
-	boss_label.size = Vector2(400, 20)
+	boss_label.size = Vector2(300, 18)
 	boss_container.add_child(boss_label)
 
 	boss_health_bar = ProgressBar.new()
-	boss_health_bar.position = Vector2(0, 20)
-	boss_health_bar.size = Vector2(400, 24)
+	boss_health_bar.position = Vector2(0, 18)
+	boss_health_bar.size = Vector2(300, 20)
 	boss_health_bar.value = 100
 	boss_health_bar.show_percentage = false
 	var bar_style = StyleBoxFlat.new()
@@ -120,19 +153,19 @@ func create_header() -> void:
 	# Right side: Audio controls
 	var audio_container = HBoxContainer.new()
 	audio_container.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	audio_container.position = Vector2(-220, 12)
-	audio_container.add_theme_constant_override("separation", 10)
+	audio_container.position = Vector2(-210, 12)
+	audio_container.add_theme_constant_override("separation", 8)
 	header_panel.add_child(audio_container)
 
 	sfx_button = Button.new()
 	sfx_button.text = "SFX: OFF"
-	sfx_button.custom_minimum_size = Vector2(90, 35)
+	sfx_button.custom_minimum_size = Vector2(80, 35)
 	sfx_button.pressed.connect(_on_sfx_button_pressed)
 	audio_container.add_child(sfx_button)
 
 	music_button = Button.new()
 	music_button.text = "Music: OFF"
-	music_button.custom_minimum_size = Vector2(100, 35)
+	music_button.custom_minimum_size = Vector2(95, 35)
 	music_button.pressed.connect(_on_music_button_pressed)
 	audio_container.add_child(music_button)
 
@@ -261,6 +294,31 @@ func create_game_over_panel() -> void:
 	restart_button.custom_minimum_size = Vector2(180, 45)
 	restart_button.pressed.connect(_on_restart_pressed)
 	vbox.add_child(restart_button)
+
+func _on_difficulty_button_pressed(difficulty: String) -> void:
+	if game_manager:
+		game_manager.set_difficulty(difficulty)
+	update_difficulty_buttons(difficulty)
+
+func update_difficulty_buttons(selected: String) -> void:
+	for diff_key in difficulty_buttons:
+		var btn = difficulty_buttons[diff_key]
+		var diff_config = config.DIFFICULTY_CONFIGS[diff_key]
+		var style = StyleBoxFlat.new()
+
+		if diff_key == selected:
+			style.bg_color = diff_config.color
+			style.border_width_bottom = 3
+			style.border_color = diff_config.color * 1.3
+		else:
+			style.bg_color = diff_config.color * 0.3
+			style.border_width_bottom = 0
+
+		btn.add_theme_stylebox_override("normal", style)
+		btn.add_theme_stylebox_override("hover", style)
+
+func _on_difficulty_changed(difficulty: String) -> void:
+	update_difficulty_buttons(difficulty)
 
 func _on_boss_spawned(boss: Node) -> void:
 	current_boss = boss

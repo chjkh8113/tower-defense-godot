@@ -14,15 +14,17 @@ var gold_reward: int
 var enemy_color: Color
 var wave_number: int = 1
 var audio_manager: Node
+var game_manager: Node = null
 var is_boss: bool = false
 var damage_reduction: float = 0.0
 
 @onready var body: ColorRect = $Sprite2D/Body
 @onready var health_bar: ProgressBar = $HealthBar
 
-func setup(type: String, wave: int = 1) -> void:
+func setup(type: String, wave: int = 1, manager: Node = null) -> void:
 	enemy_type = type
 	wave_number = wave
+	game_manager = manager
 
 	var config = preload("res://scripts/game_config.gd")
 	var enemy_config = config.ENEMY_CONFIGS[type]
@@ -54,6 +56,8 @@ func setup(type: String, wave: int = 1) -> void:
 
 func _ready() -> void:
 	audio_manager = get_node("/root/Main/AudioManager")
+	if not game_manager:
+		game_manager = get_node("/root/Main/GameManager")
 
 	if body:
 		body.color = enemy_color
@@ -71,7 +75,12 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func take_damage(amount: int) -> void:
-	var actual_damage = int(amount * (1.0 - damage_reduction))
+	# Apply difficulty damage multiplier (higher = more damage to enemies)
+	var difficulty_multiplier = 1.0
+	if game_manager and game_manager.has_method("get_damage_multiplier"):
+		difficulty_multiplier = game_manager.get_damage_multiplier()
+
+	var actual_damage = int(amount * difficulty_multiplier * (1.0 - damage_reduction))
 	if actual_damage < 1:
 		actual_damage = 1
 
