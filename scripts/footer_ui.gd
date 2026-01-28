@@ -14,7 +14,9 @@ var next_wave_button: Button
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	create_footer()
+	anchor_right = 1.0
+	anchor_bottom = 1.0
+	call_deferred("create_footer")
 
 func create_footer() -> void:
 	footer_panel = Panel.new()
@@ -101,6 +103,8 @@ func _on_tower_pressed(tower_type: String) -> void:
 	tower_selected.emit(tower_type)
 
 func update_wave_countdown(countdown: float) -> void:
+	if not wave_timer_label or not next_wave_button:
+		return
 	if countdown > 0:
 		wave_timer_label.text = "Next: %.1fs" % countdown
 		next_wave_button.visible = true

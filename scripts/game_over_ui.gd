@@ -12,7 +12,9 @@ var restart_button: Button
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	create_panel()
+	anchor_right = 1.0
+	anchor_bottom = 1.0
+	call_deferred("create_panel")
 
 func create_panel() -> void:
 	game_over_panel = Panel.new()

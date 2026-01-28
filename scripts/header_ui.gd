@@ -21,7 +21,9 @@ var boss_health_bar: ProgressBar
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	create_header()
+	anchor_right = 1.0
+	anchor_bottom = 1.0
+	call_deferred("create_header")
 
 func create_header() -> void:
 	header_panel = Panel.new()
@@ -162,21 +164,28 @@ func update_difficulty_buttons(selected: String) -> void:
 		btn.add_theme_stylebox_override("hover", style)
 
 func update_gold(amount: int) -> void:
-	gold_label.text = "Gold: %d" % amount
+	if gold_label:
+		gold_label.text = "Gold: %d" % amount
 
 func update_lives(amount: int) -> void:
-	lives_label.text = "Lives: %d" % amount
+	if lives_label:
+		lives_label.text = "Lives: %d" % amount
 
 func update_wave(wave_number: int) -> void:
-	wave_label.text = "Wave: %d" % wave_number
+	if wave_label:
+		wave_label.text = "Wave: %d" % wave_number
 
 func update_sfx_button(muted: bool) -> void:
-	sfx_button.text = "SFX: OFF" if muted else "SFX: ON"
+	if sfx_button:
+		sfx_button.text = "SFX: OFF" if muted else "SFX: ON"
 
 func update_music_button(muted: bool) -> void:
-	music_button.text = "Music: OFF" if muted else "Music: ON"
+	if music_button:
+		music_button.text = "Music: OFF" if muted else "Music: ON"
 
 func show_boss(boss: Node) -> void:
+	if not boss_container:
+		return
 	boss_container.visible = true
 	boss_health_bar.value = 100
 	if boss.has_signal("boss_health_changed"):
